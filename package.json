@@ -1,0 +1,34 @@
+{
+  "name": "finance_tracker-squad6",
+  "version": "1.0.0",
+  "description": "API de Finanças Pessoais desenvolvidas pelo Squad 6(Modulo 2, Programadores do Amanhã)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon ./src/server.js",
+    "prisma:migrate": "npx prisma migrate dev",
+    "prisma:studio": "npx prisma studio",
+    "setup": "npm install && npx prisma migrate dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/victoriasantinni/Finance_Tracker-squad6.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/victoriasantinni/Finance_Tracker-squad6/issues"
+  },
+  "homepage": "https://github.com/victoriasantinni/Finance_Tracker-squad6#readme",
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "nodemon": "^3.1.11"
+  },
+  "devDependencies": {
+    "prisma": "^5.22.0"
+  }
+}
