@@ -42,7 +42,28 @@ O arquivo `.env` contém informações sensíveis (como URLs de banco, senhas, e
 cp .env.example .env
 ```
 
-O arquivo `.env` já está configurado corretamente. **Não precisa alterar nada** se estiver trabalhando em ambiente de desenvolvimento local.
+**Atualize o arquivo `.env` com a configuração apropriada para o ambiente:**
+
+#### Ambiente de Desenvolvimento
+- Para desenvolvimento local, você pode usar o SQLite ou o PostgreSQL com um schema separado.
+- Exemplo de configuração no arquivo `.env` para SQLite:
+  ```env
+  NODE_ENV=development
+  DATABASE_URL="file:./dev.db"
+  ```
+- Exemplo de configuração no arquivo `.env` para PostgreSQL com schema `dev`:
+  ```env
+  NODE_ENV=development
+  DATABASE_URL="postgresql://<user>:<password>@<host>:<port>/<database>?schema=dev"
+  ```
+
+#### Ambiente de Produção
+- No ambiente de produção, use o PostgreSQL configurado no Render.
+- Exemplo de configuração no arquivo `.env`:
+  ```env
+  NODE_ENV=production
+  DATABASE_URL="postgresql://<user>:<password>@<host>:<port>/<database>?schema=public"
+  ```
 
 ### 3. Instale as dependências e configure o banco
 
