@@ -1,37 +1,35 @@
 generator client {
-  provider = "prisma-client-js"
-  output   = "./generated/client"
+  provider = "prisma-client-js" 
 }
 
 datasource db {
-  provider = env("DB_PROVIDER")
-  url      = env("DB_URL")
-}
+   provider = "sqlite"
+   url      = env("DATABASE_URL")
+ }
 
 model User {
-  id           Int           @id @default(autoincrement())
-  name         String
-  email        String        @unique
-  password     String
-  isActive     Boolean       @default(true)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   transactions Transaction[]
 
   @@map("users")
 }
 
 model Transaction {
-  id          Int      @id @default(autoincrement())
-  userId      Int
-  description String
-  amount      Float
-  type        String
-  category    String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        Int      @id @default(autoincrement())
+  descricao String
+  valor     Float
+  tipo      String   // 'receita' ou 'despesa'
+  categoria String?
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
-  @@map("transactions")
+  @@index([createdAt])
 }
