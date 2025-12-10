@@ -1,9 +1,12 @@
 # Finance Tracker - Squad 6
 
-API de Finanças Pessoais desenvolvida pelo Squad 6 (Módulo 2, Programadores do Amanhã)
+Bem-vindo ao Finance Tracker, a API de controle financeiro desenvolvida pelo Squad 6 (Módulo 2, Programadores do Amanhã).
+Este projeto foi criado para ajudar pessoas a organizarem suas finanças de forma simples — registrando entradas, saídas e acompanhando o fluxo de gastos ao longo do tempo.
 
 ## 📋 Estrutura do Projeto
 
+Antes de colocar a mão no código, é importante entender como o projeto está organizado. A estrutura abaixo mostra onde cada parte da aplicação vive — desde o schema do banco, até as rotas, controllers e serviços.
+Essa divisão facilita o trabalho em equipe, mantém o código limpo e ajuda cada pessoa do Squad a saber exatamente onde mexer quando for implementar novas funcionalidades.
 ```
 Finance_Tracker-squad6/
 ├── database/              # Banco de dados SQLite (não versionado)
@@ -25,189 +28,182 @@ Finance_Tracker-squad6/
 └── package.json
 ```
 
-## 🚀 Configuração Inicial (Primeira vez)
+🚀 Configuração Inicial (Primeira vez)
 
-### 1. Clone o repositório
-```bash
+Se esta é sua primeira vez rodando o Finance Tracker no seu computador, aqui é o seu ponto de partida.
+Essas etapas garantem que você tenha o ambiente certinho para trabalhar, com as dependências instaladas, o banco configurado e o servidor pronto para rodar.
+
+1. Clone o repositório
 git clone https://github.com/victoriasantinni/Finance_Tracker-squad6.git
 cd Finance_Tracker-squad6
-```
 
-### 2. Crie o arquivo `.env`
+2. Crie o arquivo .env
 
-**Por que fazer isso?**  
-O arquivo `.env` contém informações sensíveis (como URLs de banco, senhas, etc.) e **nunca deve ser compartilhado** no GitHub. Cada desenvolvedor precisa criar o seu próprio.
+O projeto usa variáveis de ambiente para guardar dados sensíveis — como a URL do banco.
+Por segurança, esse arquivo não vai para o Git, então cada pessoa cria o seu próprio:
 
-```bash
 cp .env.example .env
-```
 
-**Atualize o arquivo `.env` com a configuração apropriada para o ambiente:**
 
-#### Ambiente de Desenvolvimento
-- Para desenvolvimento local, você pode usar o SQLite ou o PostgreSQL com um schema separado.
-- Exemplo de configuração no arquivo `.env` para SQLite:
-  ```env
-  NODE_ENV=development
-  DATABASE_URL="file:./dev.db"
-  ```
-- Exemplo de configuração no arquivo `.env` para PostgreSQL com schema `dev`:
-  ```env
-  NODE_ENV=development
-  DATABASE_URL="postgresql://<user>:<password>@<host>:<port>/<database>?schema=dev"
-  ```
+Agora preencha com a configuração correta para o seu ambiente:
 
-#### Ambiente de Produção
-- No ambiente de produção, use o PostgreSQL configurado no Render.
-- Exemplo de configuração no arquivo `.env`:
-  ```env
-  NODE_ENV=production
-  DATABASE_URL="postgresql://<user>:<password>@<host>:<port>/<database>?schema=public"
-  ```
+Ambiente de Desenvolvimento
 
-### 3. Instale as dependências e configure o banco
+Exemplo usando SQLite:
 
-**Opção A - Automática (Recomendado):**
-```bash
+NODE_ENV=development
+DATABASE_URL="file:./dev.db"
+
+
+Exemplo usando PostgreSQL com schema dev:
+
+NODE_ENV=development
+DATABASE_URL="postgresql://<user>:<password>@<host>:<port>/<database>?schema=dev"
+
+Ambiente de Produção (Render)
+NODE_ENV=production
+DATABASE_URL="postgresql://<user>:<password>@<host>:<port>/<database>?schema=public"
+
+3. Instale as dependências e configure o banco
+
+Aqui você escolhe entre a forma mais rápida ou a manual.
+
+Opção A — automática (recomendada):
+
 npm run setup
-```
 
-Este comando faz **tudo** automaticamente:
-- ✅ Instala as dependências do projeto (`npm install`)
-- ✅ Cria o banco de dados SQLite em `database/dev.db`
-- ✅ Aplica todas as migrations (cria as tabelas)
-- ✅ Gera o Prisma Client automaticamente (código para acessar o banco)
 
-**Opção B - Manual:**
-```bash
-npm install              # 1. Instala dependências
-npm run prisma:migrate   # 2. Cria banco, aplica migrations E gera o client
-```
+Esse comando cuida de tudo para você:
 
-> **💡 Dica:** O comando `prisma:migrate` já faz o "generate" automaticamente! Você não precisa rodar comandos separados.
+Instala dependências
 
-### 4. Inicie o servidor
-```bash
-npm run dev
-```
+Cria o banco
 
-O servidor estará rodando em `http://localhost:3000`
+Aplica migrations
 
-## 🗄️ Gerenciamento do Banco de Dados
+Gera o Prisma Client
 
-### O que é versionado no GitHub?
+Opção B — manual:
 
-✅ **SIM - Versionar:**
-- `prisma/migrations/` - Histórico de todas as mudanças no banco
-- `prisma/schema.prisma` - Definição das tabelas
-
-❌ **NÃO - Ignorar (.gitignore):**
-- `database/` - Banco de dados local de cada desenvolvedor
-- `prisma/generated/` - Código gerado automaticamente pelo Prisma
-
-**Por quê?**
-- **Migrations** são como "commits" do banco de dados. Todos precisam ter o mesmo histórico para manter os bancos sincronizados.
-- **database/** contém dados locais de teste de cada desenvolvedor - não faz sentido versionar.
-- **prisma/generated/** é código gerado automaticamente - será criado quando rodar `npm run prisma:generate`.
-
-### Comandos úteis do Prisma
-
-```bash
-# Criar e aplicar migration (SEMPRE que alterar schema.prisma)
+npm install
 npm run prisma:migrate
-# O que faz:
-# 1. Detecta mudanças no schema.prisma
-# 2. Cria arquivo de migration (SQL)
-# 3. Aplica no banco (cria/altera tabelas)
-# 4. Gera o Prisma Client automaticamente ← Importante!
 
-# Abrir interface visual do banco de dados
+4. Inicie o servidor
+npm run dev
+
+
+A API vai rodar em: http://localhost:3000
+
+🗄️ Gerenciamento do Banco de Dados
+
+Aqui você encontra tudo que precisa saber sobre como o banco funciona no projeto e o que deve (ou não) ser versionado.
+
+O que vai para o Git?
+
+Essa separação garante que o projeto seja seguro e organizado para todo o squad.
+
+Vai pro Git:
+
+prisma/migrations/
+
+prisma/schema.prisma
+
+Não vai pro Git:
+
+database/
+
+prisma/generated/
+
+O motivo?
+
+As migrations são o “histórico oficial” do banco — todos precisam delas.
+
+O banco local é só seu e não faz sentido compartilhar.
+
+O Prisma Client é gerado automaticamente.
+
+Comandos úteis do Prisma
+
+Esses são os comandos que você mais vai usar durante o desenvolvimento:
+
+npm run prisma:migrate
+
+
+Esse comando faz:
+
+Detecta mudanças no schema
+
+Cria uma migration
+
+Aplica no banco
+
+Gera o Prisma Client
+
+Para visualizar e editar o banco na sua máquina:
+
 npm run prisma:studio
-# Abre http://localhost:5555 no navegador
-# Você pode ver e editar dados diretamente
-```
 
-**⚠️ Importante:** Você NÃO precisa rodar `prisma generate` manualmente! O comando `prisma:migrate` já faz isso automaticamente.
+🔄 Workflow de Desenvolvimento
 
-## 🔄 Workflow de Desenvolvimento
+Essa parte explica como manter seu ambiente alinhado com o da equipe e como criar migrations de forma correta (e sem dor de cabeça).
 
-### Quando você puxa código novo do GitHub:
-
-```bash
+Quando puxar código do GitHub
 git pull origin dev
-npm install                 # Instala novas dependências (se houver)
-npm run prisma:migrate      # Aplica migrations E gera o client atualizado
-```
+npm install
+npm run prisma:migrate
 
-**Por que fazer isso?**  
-Alguém da equipe pode ter adicionado novas tabelas ou campos no `schema.prisma`. O comando `prisma:migrate`:
-1. ✅ Aplica as migrations novas no seu banco local
-2. ✅ Gera o Prisma Client atualizado automaticamente
-3. ✅ Garante que seu banco fique igual ao da equipe
 
-### Quando você modifica o banco de dados:
+Isso garante que seu banco e seu Prisma Client estejam atualizados com a nova versão do projeto.
 
-**Exemplo: Adicionar o model Transaction**
+Quando você alterar o schema do banco
 
-1. **Edite** o arquivo `prisma/schema.prisma`
-   ```prisma
-   model Transaction {
-     // ...
-   }
-   
-   model User {
-     id           Int           @id @default(autoincrement())
-     // ... campos existentes
-     transactions Transaction[] // ← Descomentar essa linha!
-   }
-   ```
+Exemplo: criar o model Transaction.
 
-2. **Crie a migration:**
-   ```bash
-   npm run prisma:migrate
-   ```
-   - O Prisma vai perguntar o nome da migration
-   - Digite algo descritivo: `create_transaction_model`
-   - Pressione Enter
-   
-   **O que acontece automaticamente:**
-   - ✅ Cria pasta `prisma/migrations/[data]_create_transaction_model/`
-   - ✅ Cria arquivo SQL com os comandos CREATE TABLE
-   - ✅ Aplica no banco (tabela é criada)
-   - ✅ Gera o Prisma Client atualizado (agora tem `prisma.transaction.create()`, etc.)
+Edite o schema.prisma
 
-3. **Commite as mudanças:**
-   ```bash
-   git add prisma/schema.prisma prisma/migrations/
-   git commit -m "feat: adiciona model Transaction"
-   git push
-   ```
+Rode:
 
-**⚠️ Importante:** 
-- Sempre commite a pasta `prisma/migrations/` quando criar uma migration!
-- Nunca edite arquivos de migration já criados
-- Não commite a pasta `prisma/generated/` (é gerada automaticamente)
+npm run prisma:migrate
 
-## ⚠️ Observações Importantes
 
-### Tarefas Pendentes
+Commite:
 
-- [ ] **Criar o model Transaction** no arquivo `prisma/schema.prisma`
-- [ ] Descomentar a relação `transactions Transaction[]` no model User
-- [ ] Criar controllers, services e rotas para Transaction
+git add prisma/schema.prisma prisma/migrations/
+git commit -m "feat: adiciona model Transaction"
+git push
 
-### Evite Conflitos
 
-- **Nunca edite** arquivos de migration já criados
-- **Sempre puxe** código novo antes de criar uma migration
-- **Comunique a equipe** quando criar uma migration importante
+Regra de ouro: Nunca edite migrations antigas.
 
-## 📚 Recursos
+⚠️ Observações Importantes
 
-- [Documentação Prisma](https://www.prisma.io/docs)
-- [Prisma Schema Reference](https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference)
-- [Prisma Migrate](https://www.prisma.io/docs/concepts/components/prisma-migrate)
+Antes de continuar o desenvolvimento, vale alinhar algumas recomendações que ajudam o squad inteiro:
 
+Puxe o código antes de criar migrations
+
+Não edite migrations prontas
+
+Comunique mudanças grandes
+
+Sempre commit migrations novas
+
+Tarefas Pendentes
+
+ Criar o model Transaction
+
+ Voltar o relacionamento transactions em User
+
+ Criar rotas, controllers e serviços de Transaction
+
+📚 Recursos
+
+Aqui estão os links que mais usamos durante o projeto:
+
+Documentação do Prisma
+
+Prisma Schema Reference
+
+Guia do Prisma Migrate
 ---
 
 **Dúvidas?** Pergunte no grupo do Squad 6! 🚀
