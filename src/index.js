@@ -3,11 +3,14 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import transactionRoutes from './routes/transaction.routes.js';
 import { prisma } from './lib/prisma.js';
+import { configureSwagger } from './docs/swagger.js';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+configureSwagger(app);
 
 // Middlewares
 app.use(cors());
@@ -63,6 +66,8 @@ app.use((req, res) => {
   });
 });
 
+
+
 // Middleware de erro (deve ser o último)
 app.use((err, req, res, next) => {
   console.error('Erro:', err);
@@ -99,5 +104,6 @@ async function startServer() {
     process.exit(1);
   }
 }
+export default app;
 
-startServer();
+
