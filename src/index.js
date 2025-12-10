@@ -53,6 +53,34 @@ app.get('/health', async (req, res) => {
   }
 });
 
+// Rota get para o dashboard/resumo
+app.get('/dashboard/resumo', async (req, res) => {
+  try {
+    
+    const totalReceitas = await prisma.transaction.aggregate({
+      _sum: { valor: true },
+      where: { tipo: 'receita' }
+    });
+
+    const totalDespesas = await prisma.transaction.aggregate({
+      _sum: { valor: true },
+      where: { tipo: 'despesa' }
+    });
+
+    const receitas = totalReceitas._sum.valor || 0;
+    const despesas = totalDespesas._sum.valor || 0;
+
+    res.json({
+      totalReceitas: receitas,
+      totalDespesas: despesas,
+      saldo: receitas - despesas
+    });
+  } catch (error) {
+    console.error('Erro ao gerar resumo:', error);
+    res.status(500).json({ error: 'Erro ao gerar resumo' });
+  }
+});
+
 // Rotas da aplicação
 app.use('/transacoes', transactionRoutes);
 
