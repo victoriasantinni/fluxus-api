@@ -204,6 +204,5 @@ Documentação do Prisma
 Prisma Schema Reference
 
 Guia do Prisma Migrate
----
 
 **Dúvidas?** Pergunte no grupo do Squad 6! 🚀
