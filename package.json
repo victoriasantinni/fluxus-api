@@ -5,15 +5,15 @@
   "type": "module",
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "nodemon src/server.js",
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
     "token": "node src/utils/generateToken.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
-    "db:reset": "rm -f config/prisma/dev.db && npm run prisma:init",
+    "db:reset": "rimraf ./prisma/dev.db && npm run prisma:migrate",
     "setup": "npm install && npx prisma migrate dev",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --coverage"
   },
   "repository": {
     "type": "git",
@@ -28,21 +28,24 @@
   "homepage": "https://github.com/victoriasantinni/Finance_Tracker-squad6#readme",
   "dependencies": {
     "@prisma/client": "^5.22.0",
-    "bcryptjs": "^3.0.3",
+    "bcrypt": "6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
-    "jsonwebtoken": "^9.0.3",
-    "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1",
+    "jsonwebtoken": "^9.0.2",
+    "nodemon": "^3.1.11",
+    "prisma": "^5.22.0",
     "zod": "^4.1.13"
   },
   "devDependencies": {
+    "@types/bcrypt": "6.0.0",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
-    "jest": "^30.2.0",
-    "nodemon": "^3.1.11",
-    "prisma": "^7.1.0",
-    "supertest": "^7.1.4"
+    "cross-env": "7.0.3",
+    "jest": "30.2.0",
+    "rimraf": "6.1.2"
+  },
+  "jest": {
+    "transform": {}
   }
 }

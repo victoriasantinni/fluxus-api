@@ -1,60 +1,70 @@
 import jwt from 'jsonwebtoken';
-import * as userRepository from '../repositories/UserRepository.js';
-import * as authConfig from '../config/AuthConfig.js'; 
+import { config } from '../config/index.js';
 
-export const authMiddleware = async (req, res, next) => {
-    try {
-        const authHeader = req.headers.authorization;
-
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            return res.status(401).json({ 
-                error: 'Token de autenticação ausente ou formato inválido',
-                message: 'Use o formato: Authorization: Bearer <seu_token>'
-            });
-        }
-        
-        const token = authHeader.split(' ')[1];
-        
-        if (!token) {
-            return res.status(401).json({ 
-                error: 'Token não fornecido' 
-            });
-        }
-        
-        // CORRIGIDO: Agora puxa a chave do AuthConfig.JWT_SECRET
-        const secret = authConfig.JWT_SECRET || 'chave_secreta_padrao_mude_no_env'; 
-        
-        const payload = jwt.verify(token, secret);
-        
-        const user = await userRepository.findByEmail(payload.email); 
-
-        if (!user) {
-             return res.status(401).json({ 
-                 error: 'Token inválido: Usuário não encontrado no sistema.'
-             });
-        }
-        
-        req.user = user; 
-        
-        next();
-    } catch (error) {
-        if (error.name === 'JsonWebTokenError') {
-            return res.status(401).json({ 
-                error: 'Token inválido',
-                message: 'O token fornecido é inválido'
-            });
-        }
-        
-        if (error.name === 'TokenExpiredError') {
-            return res.status(401).json({ 
-                error: 'Token expirado',
-                message: 'O token expirou, gere um novo'
-            });
-        }
-        
-        return res.status(401).json({ 
-            error: 'Falha na autenticação',
-            detail: error.message 
-        });
+export const authenticate = (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader) {
+      return res.status(401).json({ 
+        error: 'Token de autenticação ausente',
+        message: 'Envie o token no header: Authorization: Bearer <seu_token>'
+      });
     }
+    
+    if (!authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ 
+        error: 'Formato de token inválido',
+        message: 'Use o formato: Bearer <seu_token>',
+      });
+    }
+    
+    const token = authHeader.split(' ')[1];
+    
+    if (!token) {
+      return res.status(401).json({ 
+        error: 'Token não fornecido' 
+      });
+    }
+    
+    const secret = config.jwtSecret;
+    if (!secret) {
+      throw new Error('JWT_SECRET não está definido nas variáveis de ambiente');
+    }
+    
+    const payload = jwt.verify(token, secret);
+    
+    if (!payload.userId) {
+      return res.status(401).json({ 
+        error: 'Token inválido: userId não encontrado',
+      });
+    }
+    
+    req.user = { 
+      id: parseInt(payload.userId) 
+    };
+    
+    next();
+  } catch (error) {
+    console.error(' Erro de autenticação:', error.message);
+    
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({ 
+        error: 'Token inválido',
+        message: 'O token fornecido é inválido'
+      });
+    }
+    
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ 
+        error: 'Token expirado',
+        message: 'O token expirou, gere um novo'
+      });
+    }
+    
+    return res.status(401).json({ 
+      error: 'Falha na autenticação',
+      detail: error.message 
+    });
+  }
 };

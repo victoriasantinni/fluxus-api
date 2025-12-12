@@ -1,26 +1,16 @@
 import express from 'express';
-import dotenv from 'dotenv';
 import cors from 'cors';
+import { config } from './config/index.js';
 import transactionRoutes from './routes/transaction.routes.js';
+import userRoutes from './routes/user.routes.js';
 import { prisma } from './lib/prisma.js';
-import { configureSwagger } from './docs/swagger.js';
-
-dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-
-configureSwagger(app);
+const PORT = config.port;
 
 // Middlewares
 app.use(cors());
 app.use(express.json());
-
-// Log de requisições
-app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
-  next();
-});
 
 // Rota raiz
 app.get('/', (req, res) => {
@@ -29,6 +19,8 @@ app.get('/', (req, res) => {
     version: '1.0.0',
     endpoints: {
       transacoes: '/transacoes',
+      users: '/users',
+      login: '/login',
       health: '/health'
     },
     status: 'online'
@@ -55,6 +47,8 @@ app.get('/health', async (req, res) => {
 
 // Rotas da aplicação
 app.use('/transacoes', transactionRoutes);
+app.use('/', userRoutes);
+
 
 // Rota não encontrada (404) - FORMA CORRETA
 app.use((req, res) => {
@@ -66,18 +60,12 @@ app.use((req, res) => {
   });
 });
 
-
-
 // Middleware de erro (deve ser o último)
 app.use((err, req, res, next) => {
-  console.error('Erro:', err);
-  
-  if (err.message === 'Usuário não autenticado') {
-    return res.status(401).json({ error: 'Não autenticado' });
-  }
+  console.error('Erro:', err.message);
   
   res.status(500).json({ 
-    error: 'Erro interno do servidor'
+    error: err.message || 'Erro interno do servidor'
   });
 });
 
@@ -93,17 +81,13 @@ async function startServer() {
       console.log('='.repeat(50));
       console.log(` Porta: ${PORT}`);
       console.log(` URL: http://localhost:${PORT}`);
-      console.log(` API: http://localhost:${PORT}/transacoes`);
       console.log(` Health: http://localhost:${PORT}/health`);
       console.log('='.repeat(50));
-      console.log('\n  Todas as rotas exigem autenticação JWT');
-      console.log(' Header: Authorization: Bearer <token>\n');
     });
   } catch (error) {
     console.error(' Erro ao iniciar servidor:', error);
     process.exit(1);
   }
 }
-export default app;
 
-
+startServer();
