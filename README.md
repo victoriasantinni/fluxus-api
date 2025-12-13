@@ -93,6 +93,24 @@ npm run dev
 
 O servidor estará rodando em `http://localhost:3000`
 
+
+### Código para Inserção
+
+Insira o bloco abaixo **completo** nesse local:
+
+```markdown
+## ⚠️ Convenções Críticas de Nomenclatura (Regra da API)
+
+**ATENÇÃO:** O *Schema* de Validação (Zod) e a Lógica de Negócio (Dupla 3) foram implementados utilizando a nomenclatura em **Português**. O uso de campos em Inglês nos *payloads* resultará em erro **400 Bad Request**.
+
+Ao enviar dados (POST/PUT) para a rota `/transactions`, utilize obrigatoriamente a seguinte convenção:
+
+| Campo Esperado no Schema | Uso no JSON | Valores Válidos para `tipo` |
+| :--- | :--- | :--- |
+| **`descricao`** | `"Salário do Mês"` | |
+| **`valor`** | `5500.00` | |
+| **`tipo`****`categoria`** | `"receita"` ou `"despesa"`**`"Alimentação"`** | **`"receita"`** ou **`"despesa"`** (Minúsculo) |
+
 ## 🗄️ Gerenciamento do Banco de Dados
 
 ### O que é versionado no GitHub?
@@ -211,3 +229,21 @@ Alguém da equipe pode ter adicionado novas tabelas ou campos no `schema.prisma`
 ---
 
 **Dúvidas?** Pergunte no grupo do Squad 6! 🚀
+
+## Desafios de Implementação (Nível Majestoso)
+
+Para garantir a robustez, segurança e estabilidade do fluxo de Transações, as seguintes implementações e correções foram necessárias, evoluindo o projeto além dos requisitos básicos:
+
+### 1. Segurança e Autenticação
+
+* **Implementação do Middleware de Autenticação (`auth.middleware.js`):** Criado para decodificar o token JWT em cada requisição, garantindo que o `req.user.userId` (ID do usuário logado) estivesse disponível para todas as rotas de Transação.
+* **Correção Crítica de Chave:** Foi corrigida a incompatibilidade onde o Middleware anexava `req.user.id`, mas o Controller esperava `req.user.userId`. O alinhamento destas chaves foi essencial para o funcionamento do sistema de permissão.
+
+### 2. Lógica de Negócio e Extrato
+
+* **Rota de Extrato:** Foi implementado um endpoint dedicado (`GET /transactions/saldo`) que realiza a agregação de dados no banco de dados para calcular o **Total de Receitas**, **Total de Despesas** e o **Saldo Atual**.
+
+### 3. Estabilidade e Roteamento
+
+* **Correção de Conflito de Rotas:** O endpoint específico do extrato (`/extract` ou `/saldo`) estava sendo incorretamente capturado pela rota dinâmica de busca por ID (`/:id`). Isso foi resolvido garantindo que rotas estáticas (como `/saldo`) fossem definidas **antes** de rotas dinâmicas (`/:id`) no `transaction.routes.js`.
+* **Controle de Permissão (Autorização):** Todas as operações de CRUD (Listar, Criar, Buscar por ID, Atualizar e Deletar) foram implementadas com controle de permissão, garantindo que um usuário só possa visualizar ou manipular transações que **pertencem a ele**, utilizando o `userId` extraído do JWT.

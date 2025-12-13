@@ -1,3 +1,5 @@
+// src/routes/transaction.routes.js (Com a ordem corrigida para prevenir conflitos)
+
 import { Router } from 'express';
 import * as controller from '../controllers/transaction.controller.js';
 import { authenticate } from '../middlewares/auth.middleware.js';
@@ -6,14 +8,16 @@ import { createTransactionSchema, updateTransactionSchema } from '../schemas/tra
 
 const router = Router();
 
-// Todas as rotas exigem autenticação
 router.use(authenticate);
 
-// Rotas CRUD
-router.get('/', controller.listTransactions);
+router.get('/saldo', controller.getExtractController); 
+
+router.get('/', controller.listTransactions); 
+
 router.get('/:id', controller.getTransaction);
-router.post('/', validate(createTransactionSchema), controller.createTransaction);
 router.put('/:id', validate(updateTransactionSchema), controller.updateTransaction);
 router.delete('/:id', controller.deleteTransaction);
+
+router.post('/', validate(createTransactionSchema), controller.createTransaction);
 
 export default router;

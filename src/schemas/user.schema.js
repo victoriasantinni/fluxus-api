@@ -7,6 +7,6 @@ export const createUserSchema = z.object({
 });
 
 export const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string(),
+    email: z.string().email('E-mail inválido').nonempty('O campo e-mail é obrigatório'),
+    password: z.string().nonempty('A senha é obrigatória'),
 });
