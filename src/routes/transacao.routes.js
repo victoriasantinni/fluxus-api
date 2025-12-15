@@ -1,10 +1,10 @@
-// src/routes/transaction.routes.js (Com a ordem corrigida para prevenir conflitos)
+// src/routes/transacao.routes.js
 
 import { Router } from 'express';
-import * as controller from '../controllers/transaction.controller.js';
+import * as controller from '../controllers/transacao.controller.js';
 import { authenticate } from '../middlewares/auth.middleware.js';
 import { validate } from '../middlewares/validation.middleware.js';
-import { createTransactionSchema, updateTransactionSchema } from '../schemas/transaction.schema.js';
+import { createTransactionSchema, updateTransactionSchema } from '../schemas/transacao.schema.js';
 
 const router = Router();
 

@@ -1,31 +1,35 @@
 {
-  "name": "finance_tracker-squad6",
+  "name": "fluxus-api",
   "version": "1.0.0",
-  "description": "API de Finanças Pessoais desenvolvidas pelo Squad 6(Modulo 2, Programadores do Amanhã)",
+  "description": "Fluxus API: Seu Rastreador de Finanças Pessoais",
   "type": "module",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "token": "node src/utils/generateToken.js",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
-    "prisma:studio": "prisma studio",
-    "db:reset": "rimraf ./prisma/dev.db && npm run prisma:migrate",
-    "setup": "npm install && npx prisma migrate dev",
-    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --coverage"
+    "token": "node src/utils/gerar-token.js",
+    "setup": "npm install && npx prisma migrate dev && npx prisma db seed",
+    "build:deploy": "npm install && npm run prisma:generate && npm run prisma:migrate:deploy",
+    "prisma:generate": "npx prisma@5.22.0 generate",
+    "prisma:migrate": "npx prisma@5.22.0 migrate dev",
+    "prisma:migrate:deploy": "npx prisma@5.22.0 migrate deploy",
+    "prisma:seed": "prisma db seed",
+    "prisma:studio": "prisma studio"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/victoriasantinni/Finance_Tracker-squad6.git"
+    "url": "git+https://github.com/victoriasantinni/fluxus-api.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/victoriasantinni/Finance_Tracker-squad6/issues"
+    "url": "https://github.com/victoriasantinni/fluxus-api/issues"
   },
-  "homepage": "https://github.com/victoriasantinni/Finance_Tracker-squad6#readme",
+  "homepage": "https://github.com/victoriasantinni/fluxus-api#readme",
   "dependencies": {
     "@prisma/client": "^5.22.0",
     "bcrypt": "6.0.0",
@@ -33,16 +37,17 @@
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.2",
-    "nodemon": "^3.1.11",
     "prisma": "^5.22.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "zod": "^4.1.13"
   },
   "devDependencies": {
-    "@types/bcrypt": "6.0.0",
+    "@types/bcrypt": "^6.0.0",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "cross-env": "7.0.3",
-    "jest": "30.2.0",
+    "nodemon": "^3.1.11",
     "rimraf": "6.1.2"
   },
   "jest": {

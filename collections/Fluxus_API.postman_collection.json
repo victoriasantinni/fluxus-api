@@ -1,0 +1,1116 @@
+{
+	"info": {
+		"_postman_id": "fluxus-api-collection",
+		"name": "Fluxus Finance Tracker API",
+		"description": "Collection completa da API Fluxus - Rastreador de Finanças Pessoais\n\n## Como usar:\n1. Importe esta collection no Postman ou Insomnia\n2. Configure a variável `baseUrl`:\n   - Produção: `https://fluxus-api-service.onrender.com`\n   - Local: `http://localhost:3000`\n3. Registre uma conta ou faça login para obter o token\n4. O token será salvo automaticamente na variável `token` após fazer login\n5. Todas as requisições protegidas usarão automaticamente o token\n\n⚠️ Nota: Se você já estiver logado, as rotas de registro e login retornarão erro 403.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Autenticação",
+			"description": "Endpoints de autenticação (registro, login, logout, perfil)",
+			"item": [
+				{
+					"name": "Registrar Usuário",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"usuario@email.com\",\n  \"senha\": \"senha123456\",\n  \"nome\": \"Nome do Usuário\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"register"
+							]
+						},
+						"description": "Cria uma nova conta de usuário. O campo `nome` é opcional.\n\n⚠️ Se você já estiver logado, receberá um erro 403 informando que precisa fazer logout primeiro."
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"token\", jsonData.token);",
+									"    console.log(\"Token salvo automaticamente na variável 'token'\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"usuario@email.com\",\n  \"senha\": \"senha123456\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"login"
+							]
+						},
+						"description": "Faz login e retorna um token JWT. O token é salvo automaticamente na variável `token`.\n\n⚠️ Se você já estiver logado, será redirecionado automaticamente para `/me`."
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/logout",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"logout"
+							]
+						},
+						"description": "Faz logout do usuário. Como JWT é stateless, o token não é invalidado no servidor. O cliente deve descartar o token após receber sucesso."
+					},
+					"response": []
+				},
+				{
+					"name": "Ver Meu Perfil",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"me"
+							]
+						},
+						"description": "Retorna os dados do usuário autenticado.\n\n⚠️ Se você não estiver logado, será redirecionado automaticamente para `/login`."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints de autenticação (registro, login, logout, perfil)"
+		},
+		{
+			"name": "Transações",
+			"item": [
+				{
+					"name": "Listar Transações",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/transacoes?limit=100&offset=0",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"transacoes"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "100",
+									"description": "Número máximo de transações (padrão: 100, máximo: 100)"
+								},
+								{
+									"key": "offset",
+									"value": "0",
+									"description": "Número de transações para pular (padrão: 0)"
+								}
+							]
+						},
+						"description": "Lista todas as transações do usuário autenticado com suporte a paginação."
+					},
+					"response": []
+				},
+				{
+					"name": "Ver Extrato/Saldo",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/transacoes/saldo",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"transacoes",
+								"saldo"
+							]
+						},
+						"description": "Retorna o extrato financeiro: total de receitas, total de despesas e saldo atual."
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Transação por ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/transacoes/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"transacoes",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1",
+									"description": "ID da transação"
+								}
+							]
+						},
+						"description": "Busca uma transação específica pelo ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Criar Transação",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"descricao\": \"Salário Mensal\",\n  \"valor\": 5000.00,\n  \"tipo\": \"receita\",\n  \"categoria\": \"Trabalho\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/transacoes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"transacoes"
+							]
+						},
+						"description": "Cria uma nova transação. O campo `categoria` é opcional.\n\n**Valores válidos para `tipo`:**\n- `\"receita\"` - Para entradas de dinheiro\n- `\"despesa\"` - Para saídas de dinheiro"
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Transação",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"descricao\": \"Salário Atualizado\",\n  \"valor\": 5500.00,\n  \"tipo\": \"receita\",\n  \"categoria\": \"Trabalho\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/transacoes/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"transacoes",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1",
+									"description": "ID da transação"
+								}
+							]
+						},
+						"description": "Atualiza uma transação existente. Todos os campos são opcionais, mas pelo menos um deve ser informado."
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar Transação",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/transacoes/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"transacoes",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1",
+									"description": "ID da transação"
+								}
+							]
+						},
+						"description": "Deleta uma transação. Retorna status 204 (No Content) em caso de sucesso."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints relacionados a transações financeiras"
+		},
+		{
+			"name": "🧪 Testes de Erros",
+			"description": "Collection de testes para validar o tratamento de erros da API. Use estes endpoints para verificar se as mensagens de erro estão corretas e em português brasileiro.",
+			"item": [
+				{
+					"name": "Criar Transação - Sem descrição",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"valor\": 5000.00,\n  \"tipo\": \"receita\",\n  \"categoria\": \"Trabalho\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/transacoes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"transacoes"
+							]
+						},
+						"description": "❌ Erro esperado: Campo 'descricao' é obrigatório"
+					},
+					"response": []
+				},
+				{
+					"name": "Criar Transação - Sem valor",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"descricao\": \"Compra TV\",\n  \"tipo\": \"despesa\",\n  \"categoria\": \"Eletrônicos\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/transacoes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"transacoes"
+							]
+						},
+						"description": "❌ Erro esperado: Campo 'valor' é obrigatório"
+					},
+					"response": []
+				},
+				{
+					"name": "Criar Transação - Sem tipo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"descricao\": \"Compra TV\",\n  \"valor\": 5000.00,\n  \"categoria\": \"Eletrônicos\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/transacoes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"transacoes"
+							]
+						},
+						"description": "❌ Erro esperado: Campo 'tipo' é obrigatório"
+					},
+					"response": []
+				},
+				{
+					"name": "Criar Transação - Descrição vazia",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"descricao\": \"\",\n  \"valor\": 5000.00,\n  \"tipo\": \"receita\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/transacoes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"transacoes"
+							]
+						},
+						"description": "❌ Erro esperado: Campo 'descricao' não pode estar vazio"
+					},
+					"response": []
+				},
+				{
+					"name": "Criar Transação - Descrição apenas espaços",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"descricao\": \"   \",\n  \"valor\": 5000.00,\n  \"tipo\": \"receita\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/transacoes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"transacoes"
+							]
+						},
+						"description": "❌ Erro esperado: Campo 'descricao' não pode estar vazio"
+					},
+					"response": []
+				},
+				{
+					"name": "Criar Transação - Tipo inválido",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"descricao\": \"Compra TV\",\n  \"valor\": 5000.00,\n  \"tipo\": \"reeita\",\n  \"categoria\": \"Eletrônicos\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/transacoes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"transacoes"
+							]
+						},
+						"description": "❌ Erro esperado: Campo 'tipo' deve ser 'receita' ou 'despesa'"
+					},
+					"response": []
+				},
+				{
+					"name": "Criar Transação - Valor negativo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"descricao\": \"Compra TV\",\n  \"valor\": -100.00,\n  \"tipo\": \"despesa\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/transacoes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"transacoes"
+							]
+						},
+						"description": "❌ Erro esperado: Campo 'valor' deve ser um número positivo maior que zero"
+					},
+					"response": []
+				},
+				{
+					"name": "Criar Transação - Valor zero",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"descricao\": \"Compra TV\",\n  \"valor\": 0,\n  \"tipo\": \"despesa\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/transacoes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"transacoes"
+							]
+						},
+						"description": "❌ Erro esperado: Campo 'valor' deve ser um número positivo maior que zero"
+					},
+					"response": []
+				},
+				{
+					"name": "Criar Transação - Valor como string",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"descricao\": \"Compra TV\",\n  \"valor\": \"5000\",\n  \"tipo\": \"despesa\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/transacoes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"transacoes"
+							]
+						},
+						"description": "❌ Erro esperado: Campo 'valor' deve ser um número"
+					},
+					"response": []
+				},
+				{
+					"name": "Criar Transação - Descrição muito longa",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"descricao\": \"Esta é uma descrição muito longa que excede o limite de 255 caracteres permitidos para o campo descricao. Esta é uma descrição muito longa que excede o limite de 255 caracteres permitidos para o campo descricao. Esta é uma descrição muito longa que excede o limite de 255 caracteres permitidos para o campo descricao.\",\n  \"valor\": 5000.00,\n  \"tipo\": \"receita\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/transacoes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"transacoes"
+							]
+						},
+						"description": "❌ Erro esperado: Campo 'descricao' deve ter no máximo 255 caracteres"
+					},
+					"response": []
+				},
+				{
+					"name": "Criar Transação - Categoria muito longa",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"descricao\": \"Compra TV\",\n  \"valor\": 5000.00,\n  \"tipo\": \"despesa\",\n  \"categoria\": \"Esta é uma categoria muito longa que excede o limite de 100 caracteres permitidos para o campo categoria\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/transacoes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"transacoes"
+							]
+						},
+						"description": "❌ Erro esperado: Campo 'categoria' deve ter no máximo 100 caracteres"
+					},
+					"response": []
+				},
+				{
+					"name": "Criar Transação - Body vazio",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/transacoes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"transacoes"
+							]
+						},
+						"description": "❌ Erro esperado: Todos os campos obrigatórios faltando (descricao, valor, tipo)"
+					},
+					"response": []
+				},
+				{
+					"name": "Criar Transação - Sem autenticação",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"descricao\": \"Compra TV\",\n  \"valor\": 5000.00,\n  \"tipo\": \"despesa\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/transacoes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"transacoes"
+							]
+						},
+						"description": "❌ Erro esperado: Token de autenticação ausente ou inválido"
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Transação - Body vazio",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/transacoes/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"transacoes",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1",
+									"description": "ID da transação"
+								}
+							]
+						},
+						"description": "❌ Erro esperado: Pelo menos um campo deve ser informado para atualização"
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Transação - Descrição vazia",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"descricao\": \"\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/transacoes/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"transacoes",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1",
+									"description": "ID da transação"
+								}
+							]
+						},
+						"description": "❌ Erro esperado: Campo 'descricao' não pode estar vazio"
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Transação - Valor negativo",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"valor\": -50.00\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/transacoes/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"transacoes",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1",
+									"description": "ID da transação"
+								}
+							]
+						},
+						"description": "❌ Erro esperado: Campo 'valor' deve ser um número positivo maior que zero"
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar Transação - Tipo inválido",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tipo\": \"entrada\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/transacoes/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"transacoes",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1",
+									"description": "ID da transação"
+								}
+							]
+						},
+						"description": "❌ Erro esperado: Campo 'tipo' deve ser 'receita' ou 'despesa'"
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Transação - ID inválido",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/transacoes/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"transacoes",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "abc",
+									"description": "ID inválido (não numérico)"
+								}
+							]
+						},
+						"description": "❌ Erro esperado: ID inválido"
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Transação - ID inexistente",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/transacoes/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"transacoes",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "99999",
+									"description": "ID que não existe"
+								}
+							]
+						},
+						"description": "❌ Erro esperado: Transação não encontrada (404)"
+					},
+					"response": []
+				},
+				{
+					"name": "Registrar Usuário - Email inválido",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"email-invalido\",\n  \"senha\": \"senha123456\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"register"
+							]
+						},
+						"description": "❌ Erro esperado: Campo 'email' deve ser um e-mail válido"
+					},
+					"response": []
+				},
+				{
+					"name": "Registrar Usuário - Senha muito curta",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"usuario@email.com\",\n  \"senha\": \"123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"register"
+							]
+						},
+						"description": "❌ Erro esperado: Campo 'senha' deve ter no mínimo 8 caracteres"
+					},
+					"response": []
+				},
+				{
+					"name": "Registrar Usuário - Sem email",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"senha\": \"senha123456\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"register"
+							]
+						},
+						"description": "❌ Erro esperado: Campo 'email' é obrigatório"
+					},
+					"response": []
+				},
+				{
+					"name": "Registrar Usuário - Sem senha",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"usuario@email.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"register"
+							]
+						},
+						"description": "❌ Erro esperado: Campo 'senha' é obrigatório"
+					},
+					"response": []
+				}
+			],
+			"description": "Collection de testes para validar o tratamento de erros da API"
+		},
+		{
+			"name": "Sistema",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/health",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"health"
+							]
+						},
+						"description": "Verifica o status da API e conexão com o banco de dados."
+					},
+					"response": []
+				},
+				{
+					"name": "Informações da API",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								""
+							]
+						},
+						"description": "Retorna informações sobre a API e endpoints disponíveis."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints de sistema e status"
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://fluxus-api-service.onrender.com",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
+

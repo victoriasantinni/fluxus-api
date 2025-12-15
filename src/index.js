@@ -1,9 +1,15 @@
 import express from 'express';
 import cors from 'cors';
+import swaggerUi from 'swagger-ui-express';
 import { config } from './config/index.js';
-import transactionRoutes from './routes/transaction.routes.js';
-import userRoutes from './routes/user.routes.js';
+import { swaggerSpec } from './config/swagger.js';
+import transacaoRoutes from './routes/transacao.routes.js';
+import authRoutes from './routes/auth.routes.js';
 import { prisma } from './lib/prisma.js';
+import { errorHandler } from './middlewares/error.middleware.js';
+
+// Importa documentação Swagger
+import './docs/swagger.docs.js';
 
 const app = express();
 const PORT = config.port;
@@ -12,16 +18,37 @@ const PORT = config.port;
 app.use(cors());
 app.use(express.json());
 
+// Swagger UI - Documentação da API
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: 'Fluxus: Seu Rastreador de Finanças Pessoais - Documentação',
+}));
+
 // Rota raiz
 app.get('/', (req, res) => {
     res.json({
-        message: 'API de Transações Financeiras',
+        message: 'Fluxus: Seu Rastreador de Finanças Pessoais',
         version: '1.0.0',
+        documentation: '/api-docs',
         endpoints: {
-            transacoes: '/transacoes',
-            users: '/users',
-            login: '/users/login', // Alterei para refletir a URL CORRETA
-            health: '/health'
+            autenticacao: {
+                registrar: '/register',
+                login: '/login',
+                logout: '/logout',
+                perfil: '/me'
+            },
+            transacoes: {
+                listar: '/transacoes',
+                criar: '/transacoes',
+                extrato: '/transacoes/saldo',
+                buscar: '/transacoes/:id',
+                atualizar: '/transacoes/:id',
+                deletar: '/transacoes/:id'
+            },
+            sistema: {
+                health: '/health',
+                docs: '/api-docs'
+            }
         },
         status: 'online'
     });
@@ -45,9 +72,9 @@ app.get('/health', async (req, res) => {
     }
 });
 
-// Rotas da aplicação (INTEGRAÇÃO CORRIGIDA)
-app.use('/transactions', transactionRoutes);
-app.use('/users', userRoutes); // CORREÇÃO: Adicionando o prefixo /users
+// Rotas da aplicação
+app.use('/transacoes', transacaoRoutes);
+app.use('/', authRoutes); // Rotas de autenticação: /register, /login, /logout, /me
 
 // Rota não encontrada (404)
 app.use((req, res) => {
@@ -59,40 +86,32 @@ app.use((req, res) => {
     });
 });
 
-// Middleware de erro (deve ser o último)
-app.use((err, req, res, next) => {
-    // Verifica se é um erro de validação (pode variar dependendo da biblioteca)
-    if (err.name === 'ValidationError') { 
-        console.error('Erro de Validação:', err.message);
-        // Tenta pegar os detalhes específicos do erro (ex: Joi.details)
-        const errorMessage = err.details ? err.details.map(d => d.message).join('; ') : err.message;
-        
-        return res.status(400).json({
-            error: 'Erro de Validação',
-            details: errorMessage
-        });
-    }
-
-    // Erros gerais (500)
-    console.error('Erro Interno do Servidor:', err.message);
-    res.status(500).json({ 
-        error: err.message || 'Erro interno do servidor'
-    });
-});
+// Middleware de erro (USAR O EXISTENTE)
+app.use(errorHandler);
 
 // Inicia servidor
 async function startServer() {
     try {
         await prisma.$connect();
-        console.log(' Conectado ao banco SQLite');
+        console.log('✅ Conectado ao banco PostgreSQL');
 
         app.listen(PORT, () => {
+            const isProduction = config.nodeEnv === 'production';
+            const host = isProduction 
+                ? (config.host || 'fluxus-api-service.onrender.com')
+                : (config.host || 'localhost');
+            const protocol = isProduction ? 'https' : 'http';
+            const baseUrl = isProduction 
+                ? `${protocol}://${host}`
+                : `${protocol}://${host}:${PORT}`;
+            
             console.log('\n' + '='.repeat(50));
-            console.log(' Servidor iniciado com sucesso!');
+            console.log('🚀 Servidor iniciado com sucesso!');
             console.log('='.repeat(50));
-            console.log(` Porta: ${PORT}`);
-            console.log(` URL: http://localhost:${PORT}`);
-            console.log(` Health: http://localhost:${PORT}/health`);
+            console.log(`📍 Porta: ${PORT}`);
+            console.log(`🌐 URL: ${baseUrl}`);
+            console.log(`📚 Docs: ${baseUrl}/api-docs`);
+            console.log(`💚 Health: ${baseUrl}/health`);
             console.log('='.repeat(50));
         });
     } catch (error) {

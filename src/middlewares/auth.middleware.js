@@ -1,6 +1,38 @@
 import jwt from 'jsonwebtoken';
 import { config } from '../config/index.js';
 
+// Middleware opcional: verifica se está logado mas não bloqueia se não estiver
+export const optionalAuth = (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+    
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1];
+      const secret = config.jwtSecret;
+      
+      if (secret && token) {
+        try {
+          const payload = jwt.verify(token, secret);
+          if (payload.userId) {
+            req.user = { 
+              userId: parseInt(payload.userId) 
+            };
+          }
+        } catch (error) {
+          // Token inválido, mas não bloqueia a requisição
+          req.user = null;
+        }
+      }
+    }
+    
+    next();
+  } catch (error) {
+    // Em caso de erro, continua sem autenticação
+    req.user = null;
+    next();
+  }
+};
+
 export const authenticate = (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;

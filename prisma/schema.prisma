@@ -1,35 +1,42 @@
 generator client {
-  provider = "prisma-client-js" 
+  provider = "prisma-client-js"
 }
 
 datasource db {
-   provider = "sqlite"
-   url      = env("DATABASE_URL")
- }
-
-model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String?
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  transactions Transaction[]
-
-  @@map("users")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-model Transaction {
-  id        Int      @id @default(autoincrement())
-  descricao String
-  valor     Float
-  tipo      String   // 'receita' ou 'despesa'
-  categoria String?
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// Enum para tipo de transação
+enum TipoTransacao {
+  receita
+  despesa
+}
 
-  @@index([userId])
-  @@index([createdAt])
+model Usuario {
+  id           Int           @id @default(autoincrement())
+  email        String        @unique
+  nome         String
+  senha        String
+  criadoEm     DateTime      @default(now()) @map("criado_em")
+  atualizadoEm DateTime      @updatedAt @map("atualizado_em")
+  transacoes   Transacao[]
+
+  @@map("usuarios")
+}
+
+model Transacao {
+  id           Int           @id @default(autoincrement())
+  descricao    String
+  valor        Float
+  tipo         TipoTransacao
+  categoria    String
+  usuarioId    Int           @map("usuario_id")
+  usuario      Usuario       @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  criadoEm     DateTime      @default(now()) @map("criado_em")
+  atualizadoEm DateTime      @updatedAt @map("atualizado_em")
+
+  @@index([usuarioId])
+  @@index([criadoEm])
+  @@map("transacoes")
 }

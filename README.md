@@ -1,249 +1,284 @@
-# Finance Tracker - Squad 6
+# 💰 Fluxus: Seu Rastreador de Finanças Pessoais
 
-API de Finanças Pessoais desenvolvida pelo Squad 6 (Módulo 2, Programadores do Amanhã)
+API REST para gerenciamento de finanças pessoais. Controle suas receitas e despesas de forma simples e segura.
 
-## 📋 Estrutura do Projeto
+## 🌐 Links
 
-```
-Finance_Tracker-squad6/
-├── database/              # Banco de dados SQLite (não versionado)
-│   └── dev.db            # Arquivo do banco local
-├── prisma/
-│   ├── generated/        # Prisma Client gerado (não versionado)
-│   ├── migrations/       # Histórico de mudanças no banco (versionado!)
-│   └── schema.prisma     # Schema do banco de dados
-├── src/
-│   ├── config/           # Configurações (ex: Prisma Client)
-│   ├── controllers/      # Lógica das rotas
-│   ├── routes/           # Definição de rotas
-│   ├── services/         # Lógica de negócio
-│   ├── middlewares/      # Middlewares Express
-│   ├── validations/      # Validações
-│   └── server.js         # Ponto de entrada da aplicação
-├── .env                  # Variáveis de ambiente (não versionado)
-├── .env.example          # Exemplo de variáveis (versionado)
-└── package.json
-```
+- **🌍 API:** [https://fluxus-api-service.onrender.com](https://fluxus-api-service.onrender.com)
+- **📚 Swagger:** [https://fluxus-api-service.onrender.com/api-docs](https://fluxus-api-service.onrender.com/api-docs)
+- **💚 Health:** [https://fluxus-api-service.onrender.com/health](https://fluxus-api-service.onrender.com/health)
 
-## 🚀 Configuração Inicial (Primeira vez)
+## 🚀 Funcionalidades
 
-### 1. Clone o repositório
+- ✅ CRUD completo de transações (receitas e despesas)
+- ✅ Extrato automático (saldo, total de receitas e despesas)
+- ✅ Autenticação JWT
+- ✅ Categorização de transações
+- ✅ Paginação de resultados
+- ✅ Documentação Swagger interativa
+
+## 🛠️ Endpoints
+
+**Autenticação:**
+- `POST /register` - Criar conta
+- `POST /login` - Fazer login
+- `POST /logout` - Fazer logout
+- `GET /me` - Ver perfil
+
+> **Observações:** `POST /login` redireciona para `/me` se já estiver logado. `POST /register` e `GET /register` retornam erro 403 se já estiver logado. `GET /me` redireciona para `/login` se não estiver logado.
+
+**Transações:**
+- `GET /transacoes` - Listar transações
+- `GET /transacoes/saldo` - Ver extrato
+- `GET /transacoes/:id` - Buscar transação
+- `POST /transacoes` - Criar transação
+- `PUT /transacoes/:id` - Atualizar transação
+- `DELETE /transacoes/:id` - Deletar transação
+
+> Todas as rotas de transações requerem autenticação.
+
+## 🧪 Testando a API
+
+### 1. Swagger (Recomendado)
+
+Acesse [https://fluxus-api-service.onrender.com/api-docs](https://fluxus-api-service.onrender.com/api-docs) e teste diretamente no navegador.
+
+**Como autenticar:**
+1. Faça login em `POST /login`
+2. Copie o token retornado
+3. Clique em "Authorize" 🔓 no topo da página
+4. Cole o token (sem "Bearer")
+
+**⚠️ Nota:** 
+- Se você já estiver logado e tentar fazer login, será redirecionado automaticamente para `/me`
+- Se você já estiver logado e tentar registrar uma nova conta, receberá um erro 403 informando que precisa fazer logout primeiro
+
+### 2. Postman/Insomnia
+
+**⚠️ Pré-requisito:** Instale o [Postman](https://www.postman.com/downloads/) ou [Insomnia](https://insomnia.rest/download)
+
+📥 **Download da collection:** [`collections/Fluxus_API.postman_collection.zip`](./collections/Fluxus_API.postman_collection.zip)
+
+#### Como Importar e Configurar
+
+1. **Importe a collection:**
+   - No Postman: Clique em "Import" → Selecione o arquivo ZIP
+   - No Insomnia: "Create" → "Import From" → "File" → Selecione o JSON (extraia do ZIP primeiro)
+
+2. **Configure a variável `baseUrl`:**
+   
+   **No Postman:**
+   - Clique com botão direito na collection "Fluxus Finance Tracker API"
+   - Selecione "Edit"
+   - Vá na aba "Variables"
+   - Edite o valor de `baseUrl`:
+     - **Produção:** `https://fluxus-api-service.onrender.com` // Exemplo
+     - **Local:** `http://localhost:3000`
+   - Clique em "Save"
+   
+   **No Insomnia:**
+   - Clique no ícone de engrenagem (⚙️) ao lado da collection
+   - Adicione/edite a variável `baseUrl` com o valor desejado
+
+3. **Faça login e obtenha o token:**
+   - Execute o endpoint "Login" dentro da pasta "Usuários"
+   - Use as credenciais de teste (ex: `joao@email.com` / `senha123`)
+   - O token será **salvo automaticamente** na variável `token` da collection
+   - Isso acontece porque há um script automático no endpoint "Login" que captura o token da resposta
+
+4. **Pronto!** Todas as requisições protegidas já usarão o token automaticamente
+
+#### 🔄 Como o Token é Salvo Automaticamente?
+
+O endpoint "Login" possui um script de teste que:
+1. Verifica se a resposta foi bem-sucedida (status 200)
+2. Extrai o token do JSON retornado
+3. Salva automaticamente na variável de collection `token`
+4. Todas as outras requisições usam `{{token}}` no header Authorization
+
+Você pode ver isso funcionando no console do Postman após fazer login.
+
+#### 🌐 Usar Token do Postman no Navegador Chrome
+
+Se você quiser usar o token obtido no Postman para testar a API diretamente no navegador:
+
+1. **Obtenha o token no Postman:**
+   - Execute o endpoint "Login"
+   - Copie o token da resposta JSON
+
+2. **Instale uma extensão do Chrome:**
+   - **ModHeader** (recomendado): [Chrome Web Store](https://chrome.google.com/webstore/detail/modheader/idgpnmonknjnojddfkpgkljpfnnfcklj)
+   - Ou **Requestly**: [Chrome Web Store](https://chrome.google.com/webstore/detail/requestly/mdnleldcmiljblolnjhpnblkcekpdkpa)
+
+3. **Configure o ModHeader:**
+   - Clique no ícone da extensão na barra de ferramentas
+   - Adicione um novo header:
+     - **Name:** `Authorization`
+     - **Value:** `Bearer SEU_TOKEN_AQUI` (cole o token completo)
+   - Ative o toggle para habilitar o header
+
+4. **Teste no navegador:**
+   - Acesse: `https://fluxus-api-service.onrender.com/transacoes`
+   - O header Authorization será enviado automaticamente
+   - Você verá suas transações (se o token for válido)
+
+5. **Para desativar:**
+   - Desative o toggle no ModHeader quando não precisar mais
+
+**⚠️ Dica:** O token expira em 24 horas. Se receber erro 401, faça login novamente no Postman e atualize o token no ModHeader.
+
+## 💻 Instalação Local
+
+### Pré-requisitos
+
+- Node.js 18+
+- PostgreSQL 12+ (ou SQLite)
+- Postman ou Insomnia (opcional, para testes)
+
+### Passos
+
+1. **Clone e instale:**
 ```bash
-git clone https://github.com/victoriasantinni/Finance_Tracker-squad6.git
-cd Finance_Tracker-squad6
+git clone https://github.com/victoriasantinni/fluxus-api.git
+cd fluxus-api
+npm install
 ```
 
-### 2. Crie o arquivo `.env`
-
-**Por que fazer isso?**  
-O arquivo `.env` contém informações sensíveis (como URLs de banco, senhas, etc.) e **nunca deve ser compartilhado** no GitHub. Cada desenvolvedor precisa criar o seu próprio.
-
+2. **Configure o `.env`:**
 ```bash
 cp .env.example .env
 ```
 
-**Atualize o arquivo `.env` com a configuração apropriada para o ambiente:**
+Edite o arquivo `.env` e configure:
+- `DATABASE_URL` com suas credenciais do PostgreSQL
+- `JWT_SECRET` com uma chave secreta forte (mínimo 32 caracteres)
+  - Você pode gerar uma online em: [Token Generator](https://it-tools.tech/token-generator)
 
-#### Ambiente de Desenvolvimento
-- Para desenvolvimento local, você pode usar o SQLite ou o PostgreSQL com um schema separado.
-- Exemplo de configuração no arquivo `.env` para SQLite:
-  ```env
-  NODE_ENV=development
-  DATABASE_URL="file:./dev.db"
-  ```
-- Exemplo de configuração no arquivo `.env` para PostgreSQL com schema `dev`:
-  ```env
-  NODE_ENV=development
-  DATABASE_URL="postgresql://<user>:<password>@<host>:<port>/<database>?schema=dev"
-  ```
-
-#### Ambiente de Produção
-- No ambiente de produção, use o PostgreSQL configurado no Render.
-- Exemplo de configuração no arquivo `.env`:
-  ```env
-  NODE_ENV=production
-  DATABASE_URL="postgresql://<user>:<password>@<host>:<port>/<database>?schema=public"
-  ```
-
-### 3. Instale as dependências e configure o banco
-
-**Opção A - Automática (Recomendado):**
+3. **Configure o banco:**
 ```bash
 npm run setup
 ```
 
-Este comando faz **tudo** automaticamente:
-- ✅ Instala as dependências do projeto (`npm install`)
-- ✅ Cria o banco de dados SQLite em `database/dev.db`
-- ✅ Aplica todas as migrations (cria as tabelas)
-- ✅ Gera o Prisma Client automaticamente (código para acessar o banco)
-
-**Opção B - Manual:**
-```bash
-npm install              # 1. Instala dependências
-npm run prisma:migrate   # 2. Cria banco, aplica migrations E gera o client
-```
-
-> **💡 Dica:** O comando `prisma:migrate` já faz o "generate" automaticamente! Você não precisa rodar comandos separados.
-
-### 4. Inicie o servidor
+4. **Inicie o servidor:**
 ```bash
 npm run dev
 ```
 
-O servidor estará rodando em `http://localhost:3000`
+A API estará disponível em `http://localhost:3000`
 
+## 📦 Scripts Disponíveis
 
-### Código para Inserção
+| Comando | Descrição |
+|---------|-----------|
+| `npm start` | Inicia em produção |
+| `npm run dev` | Inicia em desenvolvimento |
+| `npm run token` | Gera token JWT para testes |
+| `npm run setup` | Instala, migra e popula banco |
+| `npm run prisma:studio` | Abre Prisma Studio |
 
-Insira o bloco abaixo **completo** nesse local:
+## 🔐 Autenticação
 
-```markdown
-## ⚠️ Convenções Críticas de Nomenclatura (Regra da API)
+### Obter Token
 
-**ATENÇÃO:** O *Schema* de Validação (Zod) e a Lógica de Negócio (Dupla 3) foram implementados utilizando a nomenclatura em **Português**. O uso de campos em Inglês nos *payloads* resultará em erro **400 Bad Request**.
+**Produção:**
+1. Crie uma conta: `POST /register`
+2. Faça login: `POST /login`
+3. Use o token retornado
 
-Ao enviar dados (POST/PUT) para a rota `/transactions`, utilize obrigatoriamente a seguinte convenção:
+**⚠️ Nota:** Se você já estiver logado, essas rotas retornarão erro 403 informando que você precisa fazer logout primeiro.
 
-| Campo Esperado no Schema | Uso no JSON | Valores Válidos para `tipo` |
-| :--- | :--- | :--- |
-| **`descricao`** | `"Salário do Mês"` | |
-| **`valor`** | `5500.00` | |
-| **`tipo`****`categoria`** | `"receita"` ou `"despesa"`**`"Alimentação"`** | **`"receita"`** ou **`"despesa"`** (Minúsculo) |
-
-## 🗄️ Gerenciamento do Banco de Dados
-
-### O que é versionado no GitHub?
-
-✅ **SIM - Versionar:**
-- `prisma/migrations/` - Histórico de todas as mudanças no banco
-- `prisma/schema.prisma` - Definição das tabelas
-
-❌ **NÃO - Ignorar (.gitignore):**
-- `database/` - Banco de dados local de cada desenvolvedor
-- `prisma/generated/` - Código gerado automaticamente pelo Prisma
-
-**Por quê?**
-- **Migrations** são como "commits" do banco de dados. Todos precisam ter o mesmo histórico para manter os bancos sincronizados.
-- **database/** contém dados locais de teste de cada desenvolvedor - não faz sentido versionar.
-- **prisma/generated/** é código gerado automaticamente - será criado quando rodar `npm run prisma:generate`.
-
-### Comandos úteis do Prisma
-
+**Desenvolvimento:**
 ```bash
-# Criar e aplicar migration (SEMPRE que alterar schema.prisma)
-npm run prisma:migrate
-# O que faz:
-# 1. Detecta mudanças no schema.prisma
-# 2. Cria arquivo de migration (SQL)
-# 3. Aplica no banco (cria/altera tabelas)
-# 4. Gera o Prisma Client automaticamente ← Importante!
-
-# Abrir interface visual do banco de dados
-npm run prisma:studio
-# Abre http://localhost:5555 no navegador
-# Você pode ver e editar dados diretamente
+npm run token        # Token para usuário ID 1
+npm run token 2      # Token para usuário ID 2
 ```
 
-**⚠️ Importante:** Você NÃO precisa rodar `prisma generate` manualmente! O comando `prisma:migrate` já faz isso automaticamente.
+### Usar Token
 
-## 🔄 Workflow de Desenvolvimento
-
-### Quando você puxa código novo do GitHub:
-
-```bash
-git pull origin dev
-npm install                 # Instala novas dependências (se houver)
-npm run prisma:migrate      # Aplica migrations E gera o client atualizado
+Adicione o header em requisições protegidas:
+```
+Authorization: Bearer seu_token_aqui
 ```
 
-**Por que fazer isso?**  
-Alguém da equipe pode ter adicionado novas tabelas ou campos no `schema.prisma`. O comando `prisma:migrate`:
-1. ✅ Aplica as migrations novas no seu banco local
-2. ✅ Gera o Prisma Client atualizado automaticamente
-3. ✅ Garante que seu banco fique igual ao da equipe
+**⚠️ Sobre JWT_SECRET:**
 
-### Quando você modifica o banco de dados:
+O `JWT_SECRET` é a chave secreta usada para assinar os tokens JWT. Você pode gerar uma chave segura online em [Token Generator](https://it-tools.tech/token-generator) ou usar qualquer string aleatória forte (mínimo 32 caracteres). Configure essa chave na variável de ambiente `JWT_SECRET` no arquivo `.env` (veja `.env.example`).
 
-**Exemplo: Adicionar o model Transaction**
+## 🧪 Dados de Teste
 
-1. **Edite** o arquivo `prisma/schema.prisma`
-   ```prisma
-   model Transaction {
-     // ...
-   }
-   
-   model User {
-     id           Int           @id @default(autoincrement())
-     // ... campos existentes
-     transactions Transaction[] // ← Descomentar essa linha!
-   }
-   ```
+Após `npm run setup`, você terá:
 
-2. **Crie a migration:**
+| Email | Senha |
+|-------|-------|
+| joao@email.com | senha123 |
+| maria@email.com | senha123 |
+| admin@fluxus.com | admin123 |
+
+## 🌍 Deploy em Produção
+
+**Variáveis de ambiente necessárias:**
+- `NODE_ENV=production`
+- `HOST` (domínio do servidor)
+- `DATABASE_URL` (string de conexão do PostgreSQL)
+- `JWT_SECRET` (chave secreta forte para assinar tokens JWT - mínimo 32 caracteres)
+  - Você pode gerar uma online em: [Token Generator](https://it-tools.tech/token-generator)
+
+**Comandos no Render (ou similar):**
+- **Build:** `npm run build:deploy`
+- **Start:** `npm start`
+
+**Popular o banco com dados de teste (opcional):**
+
+Como o plano básico do Render não permite Shell, você pode rodar o seed localmente apontando para o banco de produção:
+
+1. **Configure o `.env` local** com a `DATABASE_URL` de produção (do Prisma Postgres)
+2. **Execute localmente:**
    ```bash
-   npm run prisma:migrate
-   ```
-   - O Prisma vai perguntar o nome da migration
-   - Digite algo descritivo: `create_transaction_model`
-   - Pressione Enter
-   
-   **O que acontece automaticamente:**
-   - ✅ Cria pasta `prisma/migrations/[data]_create_transaction_model/`
-   - ✅ Cria arquivo SQL com os comandos CREATE TABLE
-   - ✅ Aplica no banco (tabela é criada)
-   - ✅ Gera o Prisma Client atualizado (agora tem `prisma.transaction.create()`, etc.)
-
-3. **Commite as mudanças:**
-   ```bash
-   git add prisma/schema.prisma prisma/migrations/
-   git commit -m "feat: adiciona model Transaction"
-   git push
+   npm run prisma:seed
    ```
 
-**⚠️ Importante:** 
-- Sempre commite a pasta `prisma/migrations/` quando criar uma migration!
-- Nunca edite arquivos de migration já criados
-- Não commite a pasta `prisma/generated/` (é gerada automaticamente)
+> **⚠️ Atenção:** O seed limpa todos os dados existentes antes de popular. Use apenas na primeira vez ou quando quiser resetar o banco. Certifique-se de estar usando a `DATABASE_URL` correta antes de executar!
 
-## ⚠️ Observações Importantes
+## 🏗️ Tecnologias
 
-### Tarefas Pendentes
+- Node.js + Express
+- Prisma + PostgreSQL
+- JWT + bcrypt
+- Zod (validação)
+- Swagger/OpenAPI
 
-- [ ] **Criar o model Transaction** no arquivo `prisma/schema.prisma`
-- [ ] Descomentar a relação `transactions Transaction[]` no model User
-- [ ] Criar controllers, services e rotas para Transaction
+## 📁 Estrutura
 
-### Evite Conflitos
+```
+fluxus-api/
+├── collections/          # Collection Postman/Insomnia
+├── prisma/               # Schema e migrations
+├── src/
+│   ├── config/           # Configurações
+│   ├── controllers/      # Controladores
+│   ├── docs/             # Swagger docs
+│   ├── middlewares/      # Middlewares
+│   ├── routes/           # Rotas
+│   ├── schemas/          # Validação Zod
+│   ├── services/         # Lógica de negócio
+│   └── utils/            # Utilitários
+└── README.md
+```
 
-- **Nunca edite** arquivos de migration já criados
-- **Sempre puxe** código novo antes de criar uma migration
-- **Comunique a equipe** quando criar uma migration importante
+## 👥 Equipe
 
-## 📚 Recursos
+- Ana Victoria Santinni
+- Maxine Athos
+- Vitória Queiroz
+- Breno Araujo
+- Hudson Júnio
+- Marcelo Henrique
+- Poliana Vitoria
 
-- [Documentação Prisma](https://www.prisma.io/docs)
-- [Prisma Schema Reference](https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference)
-- [Prisma Migrate](https://www.prisma.io/docs/concepts/components/prisma-migrate)
+## 📄 Licença
+
+ISC
 
 ---
 
-**Dúvidas?** Pergunte no grupo do Squad 6! 🚀
-
-## Desafios de Implementação (Nível Majestoso)
-
-Para garantir a robustez, segurança e estabilidade do fluxo de Transações, as seguintes implementações e correções foram necessárias, evoluindo o projeto além dos requisitos básicos:
-
-### 1. Segurança e Autenticação
-
-* **Implementação do Middleware de Autenticação (`auth.middleware.js`):** Criado para decodificar o token JWT em cada requisição, garantindo que o `req.user.userId` (ID do usuário logado) estivesse disponível para todas as rotas de Transação.
-* **Correção Crítica de Chave:** Foi corrigida a incompatibilidade onde o Middleware anexava `req.user.id`, mas o Controller esperava `req.user.userId`. O alinhamento destas chaves foi essencial para o funcionamento do sistema de permissão.
-
-### 2. Lógica de Negócio e Extrato
-
-* **Rota de Extrato:** Foi implementado um endpoint dedicado (`GET /transactions/saldo`) que realiza a agregação de dados no banco de dados para calcular o **Total de Receitas**, **Total de Despesas** e o **Saldo Atual**.
-
-### 3. Estabilidade e Roteamento
-
-* **Correção de Conflito de Rotas:** O endpoint específico do extrato (`/extract` ou `/saldo`) estava sendo incorretamente capturado pela rota dinâmica de busca por ID (`/:id`). Isso foi resolvido garantindo que rotas estáticas (como `/saldo`) fossem definidas **antes** de rotas dinâmicas (`/:id`) no `transaction.routes.js`.
-* **Controle de Permissão (Autorização):** Todas as operações de CRUD (Listar, Criar, Buscar por ID, Atualizar e Deletar) foram implementadas com controle de permissão, garantindo que um usuário só possa visualizar ou manipular transações que **pertencem a ele**, utilizando o `userId` extraído do JWT.
+**Desenvolvido com ❤️ pela equipe Fluxus**

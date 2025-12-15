@@ -1,4 +1,4 @@
-// src/utils/generateToken.js
+// src/utils/gerar-token.js
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 
@@ -8,6 +8,9 @@ dotenv.config();
 // Pega o userId do argumento (padrão: 1)
 const userId = process.argv[2] ? parseInt(process.argv[2]) : 1;
 const secret = process.env.JWT_SECRET;
+const host = process.env.HOST || 'localhost';
+const port = process.env.PORT || 3000;
+const baseUrl = `http://${host}:${port}`;
 
 // Verifica se o JWT_SECRET está configurado
 if (!secret) {
@@ -45,10 +48,10 @@ console.log(token);
 console.log('\n EXEMPLOS DE USO:\n');
 
 console.log('1. Listar transações:');
-console.log(`curl -H "Authorization: Bearer ${token}" http://localhost:3000/transacoes\n`);
+console.log(`curl -H "Authorization: Bearer ${token}" ${baseUrl}/transacoes\n`);
 
 console.log('2. Criar transação:');
-console.log(`curl -X POST http://localhost:3000/transacoes \\`);
+console.log(`curl -X POST ${baseUrl}/transacoes \\`);
 console.log(`  -H "Authorization: Bearer ${token}" \\`);
 console.log(`  -H "Content-Type: application/json" \\`);
 console.log(`  -d '{"descricao":"Salário","valor":5000,"tipo":"receita","categoria":"Trabalho"}'`);
